@@ -4,7 +4,7 @@ This package is the [React](https://github.com/facebook/react) extension for [Wa
 
 ```js
 //server.js
-import wapplrReact from "wapplr-react";
+const wapplrReact = require("wapplr-react");
 const wapplrServer = require("wapplr");
 const wapp = wapplrServer({config: {
         globals: {
@@ -19,7 +19,7 @@ wapp.server.listen();
 
 ```js
 //client.js
-import wapplrReact from "wapplr-react";
+const wapplrReact = require("wapplr-react");
 const wapplrClient = require("wapplr");
 const wapp = wapplrClient({config: {
         globals: {
@@ -33,8 +33,8 @@ wapp.client.listen();
 
 ```js
 //app.js
-import App from "./App";
-export default function setContents(p = {}) {
+const App = require("./App");
+module.exports = function setContents(p = {}) {
 
     const {wapp} = p;
 
@@ -60,8 +60,8 @@ export default function setContents(p = {}) {
 
 ```js
 //App.js
-import React from "react";
-import style from "./app.css";
+const React = require("react");
+const style = require("./app.css");
 
 export default function App(props) {
 
