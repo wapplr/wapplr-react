@@ -48,12 +48,20 @@ export default function reactRender(p = {}) {
             }
             changeRoute(p = {}) {
                 const {children, route = {}} = p;
-                if (route.path !== this.state.path || children !== this.state.children) {
-                    this.setState({
-                        ...this.state,
-                        ...route,
-                        children: children || this.state.children
-                    })
+                const newState = {
+                    ...this.state,
+                    ...route,
+                    children: children || this.state.children
+                };
+                const state = this.state;
+                let changes = 0;
+                Object.keys(newState).forEach(function (key) {
+                    if (state[key] !== newState[key]){
+                        changes = changes + 1;
+                    }
+                })
+                if (changes > 0) {
+                    this.setState(newState)
                 }
             }
             render() {
@@ -85,6 +93,8 @@ export default function reactRender(p = {}) {
 
         middleware.addHandle({
             react: function(req, res, next) {
+                const {wapp} = res;
+
                 if (wapp.response.content && wapp.response.content.renderType === "react") {
 
                     if (typeof res._originalEndFunction === "undefined") {
