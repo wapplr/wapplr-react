@@ -3,8 +3,7 @@ import reactRender from "./reactRender";
 
 export default function createClient(p) {
     const wapp = p.wapp || wapplrClient({...p});
-    reactRender({wapp, ...p});
-    return wapp;
+    return reactRender({wapp, ...p});
 }
 
 export function createMiddleware(p = {}) {

@@ -3,8 +3,7 @@ import reactRender from "./reactRender";
 
 export default function createServer(p = {}) {
     const wapp = p.wapp || wapplrServer({...p});
-    reactRender({wapp, ...p});
-    return wapp;
+    return reactRender({wapp, ...p});
 }
 
 export function createMiddleware(p = {}) {
