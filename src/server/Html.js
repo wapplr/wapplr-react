@@ -34,7 +34,7 @@ export default function Html(props) {
 
     const scripts = assets.getScripts();
 
-    const stateText = `window['${appStateName}'] = JSON.parse('${JSON.stringify(state || {})}')`;
+    const stateText = `window['${appStateName}'] = ${JSON.stringify(state)}`;
 
     wapp.styles.use(style);
 
