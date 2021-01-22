@@ -1,11 +1,16 @@
-import React from 'react';
-import style from 'wapplr/dist/common/template/template_css.js';
+import React, {useContext} from "react";
+import style from "wapplr/dist/common/template/template_css.js";
+
+import {WappContext} from "../common/Wapp";
 
 export default function Html(props) {
 
-    const {wapp, contentText = ""} = props;
+    const {wapp} = useContext(WappContext);
 
-    const settings = wapp.server.settings;
+    const {contentText = ""} = props;
+
+    const config = wapp.server.config;
+
     const {
         siteName = "Wapplr",
         assets = {},
@@ -15,7 +20,7 @@ export default function Html(props) {
         manifest="/manifest.json",
         icon="data:image/png;base64,iVBORw0KGgo=",
         appleTouchIcon,
-    } = settings;
+    } = config;
 
     const {state, content = {}} = wapp.response;
     const res = (state && state.res) ? state.res : wapp.response;
@@ -34,7 +39,7 @@ export default function Html(props) {
 
     const scripts = assets.getScripts();
 
-    const stateText = `window['${appStateName}'] = ${JSON.stringify(state)}`;
+    const stateText = `window["${appStateName}"] = ${JSON.stringify(state)}`;
 
     wapp.styles.use(style);
 
@@ -55,7 +60,7 @@ export default function Html(props) {
                 <link rel={"icon"} href={icon} />
                 <link rel={"apple-touch-icon"} href={appleTouchIcon || icon} />
                 {(styles && styles.length) ? styles.map(function(style) {return <style key={style.id} id={style.id} dangerouslySetInnerHTML={{__html: style.cssText}}/>}) : null}
-                {(ExtendedHeadComponent) ? <ExtendedHeadComponent wapp={wapp} /> : null}
+                {(ExtendedHeadComponent) ? <ExtendedHeadComponent /> : null}
             </head>
             <body>
                 <div className={style.app} id={containerElementId} dangerouslySetInnerHTML={{__html: contentText}} />

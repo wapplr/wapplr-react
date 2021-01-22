@@ -62,10 +62,12 @@ export default function setContents(p = {}) {
 //App.js
 import React from "react";
 import style from "./app.css";
+import {WappContext} from "wapplr-react/dist/common/Wapp";
 
-export default function App(props) {
+export default function App() {
 
-    const {wapp} = props;
+    const {wapp} = useContext(WappContext);
+    
     wapp.styles.use(style)
     
     return (

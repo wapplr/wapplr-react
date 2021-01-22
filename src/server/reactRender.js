@@ -1,8 +1,9 @@
-import React from "react"
-import ReactDOMServer from "react-dom/server"
-import Html from "./Html"
-import Log from "../common/Log"
-import {defaultDescriptor} from "../common/utils"
+import React from "react";
+import ReactDOMServer from "react-dom/server";
+import Html from "./Html";
+import Log from "../common/Log";
+import {defaultDescriptor} from "../common/utils";
+import {WappContext, withWapp} from "../common/Wapp";
 
 export default function reactRender(p = {}) {
 
@@ -26,12 +27,27 @@ export default function reactRender(p = {}) {
             react: function(req, res, next) {
                 if (wapp.response.content && wapp.response.content.renderType === "react") {
 
-                    res.status(wapp.response.statusCode || 200);
+                    res.wapp.response.status(wapp.response.statusCode || 200);
 
                     const Content = wapp.response.content.render;
-                    const contentText = ReactDOMServer.renderToStaticMarkup(<Content wapp={wapp} />)
+                    const Render = withWapp(Content);
+
+                    const contentText = ReactDOMServer.renderToStaticMarkup(
+                        <WappContext.Provider value={{ wapp }}>
+                            <Render />
+                        </WappContext.Provider>
+                    )
+
                     const RenderHtml = wapp.contents.getComponent("html") || Html;
-                    res.send("<!DOCTYPE html>" + ReactDOMServer.renderToStaticMarkup(<RenderHtml wapp={wapp} contentText={contentText}/>));
+
+                    res.wapp.response.send("<!DOCTYPE html>" +
+                        ReactDOMServer.renderToStaticMarkup(
+                            <WappContext.Provider value={{ wapp }}>
+                                <RenderHtml contentText={contentText}/>
+                            </WappContext.Provider>
+                        )
+                    );
+
                     next();
 
                 } else {
@@ -46,6 +62,8 @@ export default function reactRender(p = {}) {
             enumerable: false,
             value: true
         });
+
+        Object.defineProperty(middleware, "wapp", {...defaultDescriptor, writable: false, enumerable: false, value: wapp});
 
     }
 

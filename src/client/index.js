@@ -8,7 +8,7 @@ export default function createClient(p) {
 
 export function createMiddleware(p = {}) {
     return function reactMiddleware(req, res, next) {
-        const wapp = req.wapp || p.wapp || createClient;
+        const wapp = req.wapp || p.wapp || createClient(p).wapp;
         reactRender({wapp, ...p});
         next();
     }
@@ -28,7 +28,7 @@ const defaultConfig = {
 
 export function run(p = defaultConfig) {
 
-    const wapp = createClient(p);
+    const wapp = createClient(p).wapp;
     const globals = wapp.globals;
     const {DEV} = globals;
 

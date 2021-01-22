@@ -1,12 +1,13 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import style from 'wapplr/dist/common/logo/logo_css.js';
 
-export default function Log (props) {
+import {WappContext} from "../Wapp";
 
-    const {wapp} = props;
-    const {styles} = wapp;
+export default function Logo() {
 
-    styles.use(style);
+    const {wapp} = useContext(WappContext);
+
+    wapp.styles.use(style);
 
     return (
         <div className={style.logo}>

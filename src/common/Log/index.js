@@ -1,40 +1,63 @@
-import React from 'react';
-import style from 'wapplr/dist/common/log/log_css.js';
-import WapplrLogo from '../Logo';
+import React, {useContext, useEffect, useState} from "react";
+import style from "wapplr/dist/common/log/log_css.js";
+
+import getUtils from "../Wapp/getUtils";
+import {WappContext} from "../Wapp";
+import WapplrLogo from "../Logo";
 import Template from "../Template";
+
+function DefaultParent(props) {
+    return React.children.only(props.children);
+}
 
 export default function Log (props) {
 
-    const {wapp, Parent = Template, Logo = WapplrLogo} = props;
+    const context = useContext(WappContext);
+    const {wapp} = context;
+    const utils = getUtils(context);
+
+    const {
+        Logo = WapplrLogo,
+        subscribe
+    } = props;
+
+    const Parent = (typeof props.Parent == "undefined") ? Template : (props.Parent === null) ? DefaultParent : props.Parent;
+
+    const [stateUrl, setUrl] = useState(utils.getRequestUrl());
+
+    function onLocationChange(newUrl){
+        if (stateUrl !== newUrl){
+            setUrl(newUrl);
+        }
+    }
+
+    useEffect(function didMount(){
+        const unsub = (subscribe) ? subscribe.locationChange(onLocationChange) : null
+        return function willUnmount() {
+            if (unsub) {
+                unsub();
+            }
+        }
+    }, [stateUrl])
+
+
     const {request, response, styles} = wapp;
-    const {state} = response;
-    const res = (state && state.res) ? state.res : response;
-    const req = (state && state.req) ? state.req : request;
-    const {remoteAddress, httpVersion, method, url, timestamp} = req;
-    const {statusCode = 200, statusMessage = "", errorMessage = ""} = res;
+    const {remoteAddress, httpVersion, method, url, timestamp} = request;
+    const {statusCode = 200, statusMessage = "", errorMessage = ""} = response;
 
     const text = `[LOG] [${timestamp} - ${remoteAddress}] HTTP:${httpVersion} ${method} ${url || "/"} -> [${statusCode}] ${errorMessage || statusMessage}`
 
-    styles.use(style)
+    styles.use(style);
 
-    const renderedLogo = Logo({wapp});
-
-    const renderedLog =
-        <div className={style.log}>
-            <div className={style.logo}>
-                {renderedLogo}
+    return (
+        <Parent {...props} subscribe={null}>
+            <div className={style.log}>
+                <div className={style.logo}>
+                    {(Logo) ? <Logo /> : null}
+                </div>
+                <div>{text}</div>
             </div>
-            <div>{text}</div>
-        </div>
-
-    if (Parent) {
-        return (
-            <Parent {...props}>
-                {renderedLog}
-            </Parent>
-        )
-    }
-
-    return renderedLog;
+        </Parent>
+    )
 
 }

@@ -1,7 +1,47 @@
 import React, {useEffect} from "react";
-import ReactDOM from "react-dom"
+import ReactDOM from "react-dom";
+
 import Log from "../common/Log";
 import {defaultDescriptor} from "../common/utils";
+import {withWapp, WappContext} from "../common/Wapp";
+
+class Wapplr extends React.Component {
+    constructor(props, context) {
+        super(props, context);
+        this.setRef = this.setRef.bind(this);
+        this.refElement = null;
+        this.state = {
+            Component: props.Component
+        }
+    }
+    setRef(e) {
+        this.refElement = e;
+    }
+    renderAgain(Component) {
+        const {wapp} = this.context;
+        if (Component !== this.state.Component) {
+            this.setState({
+                Component
+            })
+        } else {
+            if (this.refElement && this.refElement.onLocationChange){
+                this.refElement.onLocationChange(wapp.response.req.url)
+            }
+        }
+    }
+    componentWillUnmount() {
+        this.refElement = null;
+    }
+    render() {
+        const Component = (this.state.Component) ? withWapp(this.state.Component) : null;
+        if (Component) {
+            const setRef = this.setRef;
+            return <Component ref={setRef}/>
+        }
+        return null;
+    }
+}
+Wapplr.contextType = WappContext;
 
 export default function reactRender(p = {}) {
 
@@ -10,86 +50,39 @@ export default function reactRender(p = {}) {
 
     if (!middleware._initializedWapplrReact) {
 
-        const settings = wapp.client.settings;
-        if (!settings.styles){
-            settings.styles = {};
+        const config = wapp.client.config;
+        if (!config.styles){
+            config.styles = {};
         }
-        if (typeof settings.styles.disableClearStyles == "undefined"){
-            settings.styles.disableClearStyles = true;
+        if (typeof config.styles.disableClearStyles == "undefined"){
+            config.styles.disableClearStyles = true;
         }
 
         wapp.contents.add({
             log: {
-                render: function Render(props) {
-                    return Log(props);
-                },
+                render: Log,
                 renderType: "react"
             }
         })
 
+        let lastRenderType = null;
+
         wapp.styles.use = function (styles) {
-            if (wapp.response.content.renderType === "react") {
+            if ((wapp.response.content && wapp.response.content.renderType === "react") ||
+                (!wapp.response.content && lastRenderType === "react")
+            ) {
                 // eslint-disable-next-line react-hooks/rules-of-hooks
                 useEffect(function () {
                     return wapp.styles.add(styles)
                 })
+                lastRenderType = "react"
             } else {
+                lastRenderType = null;
                 return wapp.styles.add(styles)
             }
         }
 
-        class Render extends React.Component {
-            constructor(props) {
-                super(props)
-                this.state = {
-                    ...wapp.response.route,
-                    children: props.children
-                }
-            }
-            changeRoute(p = {}) {
-                const {children, route = {}} = p;
-                const newState = {
-                    ...this.state,
-                    ...route,
-                    children: children || this.state.children
-                };
-                const state = this.state;
-                let changes = 0;
-                Object.keys(newState).forEach(function (key) {
-                    if (state[key] !== newState[key]){
-                        changes = changes + 1;
-                    }
-                })
-                if (changes > 0) {
-                    this.setState(newState)
-                }
-            }
-            render() {
-                if (React.isValidElement(this.state.children)){
-                    return this.state.children;
-                } else if (typeof this.state.children == "function"){
-                    const Children = this.state.children;
-                    return <Children wapp={wapp} />
-                }
-                return null;
-            }
-        }
-
-        class Content extends React.Component {
-            render() {
-                const {wapp} = this.props;
-                const {content = {}} = wapp.response;
-                const Render = content.render;
-
-                if (!Render){
-                    return null;
-                }
-
-                return <Render wapp={wapp} />
-            }
-        }
-
-        let reactRendered = null;
+        let renderedRef = null;
 
         middleware.addHandle({
             react: function(req, res, next) {
@@ -108,35 +101,41 @@ export default function reactRender(p = {}) {
 
                     }
 
-                    res.end = function (children) {
-                        if (React.isValidElement(children) ||
-                            (children && children.name && children.name.slice(0,1).toLowerCase() !== children.name.slice(0,1)) ||
-                            children === Content
+                    res.end = function (Component) {
+                        if (
+                            React.isValidElement(Component) ||
+                            (Component && Component.name && Component.name.slice(0,1).toLowerCase() !== Component.name.slice(0,1))
                         ) {
-                            if (!res.headersSent) {
+                            if (!wapp.response.sended) {
                                 Object.defineProperty(res, "headersSent", {...defaultDescriptor, enumerable: false, writable: false, value: true})
                                 const container = wapp.response.container;
-                                if (!reactRendered){
-                                    ReactDOM.render(<Render ref={function (e){reactRendered = e;}}>{children}</Render>, container)
+
+                                if (!renderedRef){
+                                    ReactDOM.render(
+                                        <WappContext.Provider value={{ wapp }}>
+                                            <Wapplr ref={function (e){renderedRef = e;}} Component={Component}/>
+                                        </WappContext.Provider>,
+                                        container
+                                    )
+
                                 } else {
-                                    reactRendered.changeRoute({route: {...wapp.response.route}, children})
+                                    renderedRef.renderAgain(Component);
                                 }
-                            } else {
-                                //throw error;
-                            }
+                            } else {}
+
                         } else {
-                            reactRendered = null;
-                            res._originalEndFunction(children);
+                            renderedRef = null;
+                            res._originalEndFunction(Component);
                         }
                     }
 
-                    res.status(wapp.response.statusCode || 200);
-                    res.send(Content);
+                    res.wapp.response.status(wapp.response.statusCode || 200);
+                    res.wapp.response.send(wapp.response.content.render);
 
                     next();
 
                 } else {
-                    res.end = (res.originalEndFunction) ? res.originalEndFunction : res.end;
+                    res.end = (res._originalEndFunction) ? res._originalEndFunction : res.end;
                     next();
                 }
             }
@@ -148,6 +147,8 @@ export default function reactRender(p = {}) {
             enumerable: false,
             value: true
         });
+
+        Object.defineProperty(middleware, "wapp", {...defaultDescriptor, writable: false, enumerable: false, value: wapp});
 
     }
 
