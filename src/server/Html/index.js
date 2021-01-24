@@ -1,13 +1,13 @@
 import React, {useContext} from "react";
-import style from "wapplr/dist/common/template/template_css.js";
+import style from "wapplr/dist/common/template/app_css.js";
 
-import {WappContext} from "../common/Wapp";
+import {WappContext} from "../../common/Wapp";
 
 export default function Html(props) {
 
-    const {wapp} = useContext(WappContext);
+    const {wapp, req, res} = useContext(WappContext);
 
-    const {contentText = ""} = props;
+    const {contentText = "", appStyle = style} = props;
 
     const config = wapp.server.config;
 
@@ -22,26 +22,24 @@ export default function Html(props) {
         appleTouchIcon,
     } = config;
 
-    const {state, content = {}} = wapp.response;
-    const res = (state && state.res) ? state.res : wapp.response;
-    const {statusCode = 200, containerElementId = "app", appStateName = "APP_STATE"} = res;
+    const {state, content = {}, statusCode = 200, containerElementId = "app", appStateName = "APP_STATE"} = res.wappResponse;
 
     let {title = "", description = "", author = "Wapplr"} = content;
 
-    if (typeof title === "function") {title = title(wapp);}
+    if (typeof title === "function") {title = title({wapp, req, res});}
     title = `${(title) ? title : (statusCode === 404) ? "Not Found | " + siteName : "Untitled Page | " + siteName }`;
 
-    if (typeof description === "function") {description = description(wapp)}
+    if (typeof description === "function") {description = description({wapp, req, res})}
     description = (description) ? description : (title && title.split) ? title.split(" | ")[0] : title;
 
-    if (typeof author === "function") {author = author(wapp)}
+    if (typeof author === "function") {author = author({wapp, req, res})}
     author = (author || siteName)
 
     const scripts = assets.getScripts();
 
     const stateText = `window["${appStateName}"] = ${JSON.stringify(state)}`;
 
-    wapp.styles.use(style);
+    wapp.styles.use(appStyle);
 
     const styles = wapp.styles.getCssText();
 
@@ -63,7 +61,7 @@ export default function Html(props) {
                 {(ExtendedHeadComponent) ? <ExtendedHeadComponent /> : null}
             </head>
             <body>
-                <div className={style.app} id={containerElementId} dangerouslySetInnerHTML={{__html: contentText}} />
+                <div className={appStyle.app} id={containerElementId} dangerouslySetInnerHTML={{__html: contentText}} />
                 {(stateText) ? <script dangerouslySetInnerHTML={{ __html: stateText }}/> : null}
                 {(scripts && scripts.length) ? scripts.map(function(script) { return <script key={script} src={script} />}) : null}
             </body>
