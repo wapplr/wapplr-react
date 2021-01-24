@@ -25,24 +25,24 @@ export default function reactRender(p = {}) {
 
         middleware.addHandle({
             react: function(req, res, next) {
-                if (wapp.response.content && wapp.response.content.renderType === "react") {
+                if (res.wappResponse.content && res.wappResponse.content.renderType === "react") {
 
-                    res.wapp.response.status(wapp.response.statusCode || 200);
+                    res.wappResponse.status(res.wappResponse.statusCode || 200);
 
-                    const Content = wapp.response.content.render;
+                    const Content = res.wappResponse.content.render;
                     const Render = withWapp(Content);
 
                     const contentText = ReactDOMServer.renderToStaticMarkup(
-                        <WappContext.Provider value={{ wapp }}>
+                        <WappContext.Provider value={{ wapp, req, res }}>
                             <Render />
                         </WappContext.Provider>
                     )
 
                     const RenderHtml = wapp.contents.getComponent("html") || Html;
 
-                    res.wapp.response.send("<!DOCTYPE html>" +
+                    res.wappResponse.send("<!DOCTYPE html>" +
                         ReactDOMServer.renderToStaticMarkup(
-                            <WappContext.Provider value={{ wapp }}>
+                            <WappContext.Provider value={{ wapp, req, res }}>
                                 <RenderHtml contentText={contentText}/>
                             </WappContext.Provider>
                         )

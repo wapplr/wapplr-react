@@ -7,13 +7,13 @@ import WapplrLogo from "../Logo";
 import Template from "../Template";
 
 function DefaultParent(props) {
-    return React.children.only(props.children);
+    return React.Children.only(props.children);
 }
 
 export default function Log (props) {
 
     const context = useContext(WappContext);
-    const {wapp} = context;
+    const {wapp, req, res} = context;
     const utils = getUtils(context);
 
     const {
@@ -41,9 +41,9 @@ export default function Log (props) {
     }, [stateUrl])
 
 
-    const {request, response, styles} = wapp;
-    const {remoteAddress, httpVersion, method, url, timestamp} = request;
-    const {statusCode = 200, statusMessage = "", errorMessage = ""} = response;
+    const {styles} = wapp;
+    const {remoteAddress, httpVersion, method, url, timestamp} = req.wappRequest;
+    const {statusCode = 200, statusMessage = "", errorMessage = ""} = res.wappResponse;
 
     const text = `[LOG] [${timestamp} - ${remoteAddress}] HTTP:${httpVersion} ${method} ${url || "/"} -> [${statusCode}] ${errorMessage || statusMessage}`
 

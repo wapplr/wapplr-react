@@ -1,4 +1,4 @@
-import wapplrServer from 'wapplr';
+import wapplrServer from "wapplr";
 import reactRender from "./reactRender";
 
 export default function createServer(p = {}) {

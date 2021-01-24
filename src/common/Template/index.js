@@ -1,4 +1,5 @@
 import React, {useContext, useEffect, useState} from "react";
+import appStyle from "wapplr/dist/common/template/app_css.js";
 import style from "wapplr/dist/common/template/template_css.js";
 
 import getUtils from "../Wapp/getUtils";
@@ -20,7 +21,7 @@ export default function Template(props) {
             {name: "EXTERNAL", href:"https://google.com", target:"_blank"}
         ],
         Logo = WapplrLogo,
-        subscribe
+        subscribe,
     } = props;
 
     const {styles} = wapp;
@@ -28,10 +29,13 @@ export default function Template(props) {
     const copyright = `${siteName} ${new Date().getFullYear()} ©`;
 
     styles.use(style);
+    styles.use(appStyle);
 
-    const [url, setUrl] = useState(utils.getRequestUrl());
+    const defaultUrl = utils.getRequestUrl();
+    const [url, setUrl] = useState(defaultUrl);
 
     function onLocationChange(newUrl){
+        console.log(url, newUrl)
         if (url !== newUrl){
             setUrl(newUrl);
         }
@@ -45,6 +49,9 @@ export default function Template(props) {
     useEffect(function didMount(){
         window.addEventListener("scroll", onScroll);
         const unsub = (subscribe) ? subscribe.locationChange(onLocationChange) : null;
+        if (defaultUrl !== url){
+            setUrl(defaultUrl)
+        }
         return function willUnmount() {
             window.removeEventListener("scroll", onScroll);
             if (unsub) {

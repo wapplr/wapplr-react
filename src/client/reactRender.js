@@ -18,14 +18,14 @@ class Wapplr extends React.Component {
         this.refElement = e;
     }
     renderAgain(Component) {
-        const {wapp} = this.context;
+        const {res} = this.context;
         if (Component !== this.state.Component) {
             this.setState({
                 Component
             })
         } else {
             if (this.refElement && this.refElement.onLocationChange){
-                this.refElement.onLocationChange(wapp.response.req.url)
+                this.refElement.onLocationChange(res.wappResponse.store.getState().req.url)
             }
         }
     }
@@ -66,10 +66,16 @@ export default function reactRender(p = {}) {
         })
 
         let lastRenderType = null;
+        let mutableContext = {
+            wapp,
+            req: null,
+            res: null
+        };
 
         wapp.styles.use = function (styles) {
-            if ((wapp.response.content && wapp.response.content.renderType === "react") ||
-                (!wapp.response.content && lastRenderType === "react")
+            if ((mutableContext.res.wappResponse.content &&
+                mutableContext.res.wappResponse.content.renderType === "react") ||
+                (!mutableContext.res.wappResponse.content && lastRenderType === "react")
             ) {
                 // eslint-disable-next-line react-hooks/rules-of-hooks
                 useEffect(function () {
@@ -86,9 +92,11 @@ export default function reactRender(p = {}) {
 
         middleware.addHandle({
             react: function(req, res, next) {
-                const {wapp} = res;
 
-                if (wapp.response.content && wapp.response.content.renderType === "react") {
+                mutableContext.req = req;
+                mutableContext.res = res;
+
+                if (res.wappResponse.content && res.wappResponse.content.renderType === "react") {
 
                     if (typeof res._originalEndFunction === "undefined") {
 
@@ -102,39 +110,33 @@ export default function reactRender(p = {}) {
                     }
 
                     res.end = function (Component) {
-                        if (
-                            React.isValidElement(Component) ||
-                            (Component && Component.name && Component.name.slice(0,1).toLowerCase() !== Component.name.slice(0,1))
-                        ) {
-                            if (!wapp.response.sended) {
-                                Object.defineProperty(res, "headersSent", {...defaultDescriptor, enumerable: false, writable: false, value: true})
-                                const container = wapp.response.container;
+                        if (!res.wappResponse.sended) {
+                            Object.defineProperty(res, "headersSent", {...defaultDescriptor, enumerable: false, writable: false, value: true})
 
-                                if (!renderedRef){
-                                    ReactDOM.render(
-                                        <WappContext.Provider value={{ wapp }}>
-                                            <Wapplr ref={function (e){renderedRef = e;}} Component={Component}/>
-                                        </WappContext.Provider>,
-                                        container
-                                    )
+                            const container = res.wappResponse.container;
 
-                                } else {
-                                    renderedRef.renderAgain(Component);
-                                }
-                            } else {}
+                            if (!renderedRef){
+                                ReactDOM.render(
+                                    <WappContext.Provider value={mutableContext}>
+                                        <Wapplr ref={function (e){renderedRef = e;}} Component={Component}/>
+                                    </WappContext.Provider>,
+                                    container
+                                )
 
-                        } else {
-                            renderedRef = null;
-                            res._originalEndFunction(Component);
+                            } else {
+                                renderedRef.renderAgain(Component);
+                            }
+
                         }
                     }
 
-                    res.wapp.response.status(wapp.response.statusCode || 200);
-                    res.wapp.response.send(wapp.response.content.render);
+                    res.wappResponse.status(res.wappResponse.statusCode || 200);
+                    res.wappResponse.send(res.wappResponse.content.render);
 
                     next();
 
                 } else {
+                    renderedRef = null;
                     res.end = (res._originalEndFunction) ? res._originalEndFunction : res.end;
                     next();
                 }

@@ -6,6 +6,7 @@ This package is the [React](https://github.com/facebook/react) extension for [Wa
 //server.js
 import wapplrReact from "wapplr-react";
 import wapplrServer from "wapplr";
+
 const wapp = wapplrServer({config: {
         globals: {
             WAPP: "yourBuildHash",
@@ -13,7 +14,9 @@ const wapp = wapplrServer({config: {
         }
     }
 });
+
 wapplrReact({wapp});
+
 wapp.server.listen();
 ```
 
@@ -21,13 +24,16 @@ wapp.server.listen();
 //client.js
 import wapplrReact from "wapplr-react";
 import wapplrClient from "wapplr";
+
 const wapp = wapplrClient({config: {
         globals: {
             WAPP: "yourBuildHash"
         }
     }
 });
+
 wapplrReact({wapp});
+
 wapp.client.listen();
 ```
 
@@ -41,7 +47,7 @@ export default function setContents(p = {}) {
     wapp.contents.add({
         home: {
             render: App,
-            description: "My react app",
+            description: "My React app",
             renderType: "react"
         }
     })
@@ -60,25 +66,47 @@ export default function setContents(p = {}) {
 
 ```js
 //App.js
-import React from "react";
-import style from "./app.css";
+import React, {useContext, useState, useEffect} from "react";
+import getUtils from "wapplr-react/dist/common/Wapp/getUtils";
 import {WappContext} from "wapplr-react/dist/common/Wapp";
 
-export default function App() {
+import style from "./app.css";
 
-    const {wapp} = useContext(WappContext);
-    
-    wapp.styles.use(style)
-    
+export default function App(props) {
+
+    const context = useContext(WappContext);
+    const {wapp} = context;
+    const utils = getUtils(context);
+    const {subscribe} = props;
+
+    wapp.styles.use(style);
+
+    const [url, setUrl] = useState(utils.getRequestUrl());
+
+    function onLocationChange(newUrl){
+        if (url !== newUrl){
+            setUrl(newUrl);
+        }
+    }
+
+    useEffect(function (){
+        const unsub = subscribe.locationChange(onLocationChange);
+        return function useUnsubscribe(){
+            unsub();
+        }
+    }, [url])
+
     return (
-        <div className={style.app}>{"HOME"}</div>
+        <div className={style.app}>
+            {url}
+        </div>
     );
 }
 ```
 
 ```css
 /*app.css*/
-.app{
+.app {
     color: black;
 }
 ```
