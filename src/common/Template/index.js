@@ -35,7 +35,6 @@ export default function Template(props) {
     const [url, setUrl] = useState(defaultUrl);
 
     function onLocationChange(newUrl){
-        console.log(url, newUrl)
         if (url !== newUrl){
             setUrl(newUrl);
         }

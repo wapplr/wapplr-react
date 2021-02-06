@@ -116,7 +116,7 @@ export default function reactRender(p = {}) {
                             const container = res.wappResponse.container;
 
                             if (!renderedRef){
-                                ReactDOM.render(
+                                ReactDOM.hydrate(
                                     <WappContext.Provider value={mutableContext}>
                                         <Wapplr ref={function (e){renderedRef = e;}} Component={Component}/>
                                     </WappContext.Provider>,

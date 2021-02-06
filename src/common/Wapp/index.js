@@ -12,6 +12,7 @@ export function withWapp(ComposedComponent) {
             this.handlers = {};
 
             this.setHandler = this.setHandler.bind(this);
+            this.getHandlers = this.getHandlers.bind(this);
             this.onLocationChange = this.onLocationChange.bind(this);
 
             this.state = {
@@ -19,18 +20,22 @@ export function withWapp(ComposedComponent) {
             }
 
         }
+        getHandlers() {
+            return this.handlers;
+        }
         componentDidMount() {
             const {res} = this.context;
-            const handlers = this.handlers;
+            const getHandlers = this.getHandlers;
             this.unsubscribe = res.wappResponse.store.subscribe(function (state, {type, payload}) {
+                const handlers = getHandlers();
                 if (type === "INS_RES" && payload.name === "responses"){
                     if (handlers["requestResolved"]) {
                         handlers["requestResolved"]({...payload.value});
                     }
                 }
                 if (type === "SET_REQ" && payload.name === "user"){
-                    if (handlers["changeUser"]) {
-                        handlers["changeUser"]((payload.value?._id) ? {...payload.value} : null);
+                    if (handlers["userChange"]) {
+                        handlers["userChange"]((payload.value?._id) ? {...payload.value} : null);
                     }
                 }
             })
@@ -67,10 +72,10 @@ export function withWapp(ComposedComponent) {
                         setHandler("requestResolved", null)
                     }
                 },
-                changeUser: function (fn) {
-                    setHandler("changeUser", fn)
+                userChange: function (fn) {
+                    setHandler("userChange", fn)
                     return function () {
-                        setHandler("changeUser", null)
+                        setHandler("userChange", null)
                     }
                 }
             }
