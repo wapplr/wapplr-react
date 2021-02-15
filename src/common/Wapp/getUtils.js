@@ -3,13 +3,13 @@ export default function getUtils(context) {
     const {wapp, req, res} = context;
 
     function historyPush({redirect, response, requestName, timeOut}) {
-        if (response[requestName]?.record?._id && redirect){
+        if (!response[requestName]?.error && typeof response[requestName]?.record !== "undefined" && redirect){
             const parsedUrl = {
                 ...(typeof redirect == "object") ? redirect : {},
                 pathname: (typeof redirect == "string") ? redirect : redirect.pathname,
             }
 
-            if (parsedUrl.pathname) {
+            if (parsedUrl.pathname && response[requestName].record?._id) {
                 parsedUrl.pathname = parsedUrl.pathname.replace(":_id", response[requestName].record._id);
             }
 
