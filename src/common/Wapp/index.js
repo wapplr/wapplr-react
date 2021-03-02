@@ -30,7 +30,7 @@ export function withWapp(ComposedComponent) {
                 const handlers = getHandlers();
                 if (type === "INS_RES" && payload.name === "responses"){
                     if (handlers["requestResolved"]) {
-                        handlers["requestResolved"]({...payload.value});
+                        handlers["requestResolved"](payload);
                     }
                 }
                 if (type === "SET_REQ" && payload.name === "user"){
@@ -55,7 +55,7 @@ export function withWapp(ComposedComponent) {
         }
         render() {
 
-            const props = {...this.props};
+            const {forwardedRef, ...props} = this.props;
 
             const setHandler = this.setHandler;
 
@@ -81,7 +81,7 @@ export function withWapp(ComposedComponent) {
             }
 
             return (
-                <ComposedComponent {...props} />
+                <ComposedComponent {...props} ref={forwardedRef} />
             )
         }
     }
@@ -92,6 +92,8 @@ export function withWapp(ComposedComponent) {
     WithWapp.contextType = WappContext;
     WithWapp.ComposedComponent = ComposedComponent;
 
-    return WithWapp;
-
+    return React.forwardRef((props, ref) => {
+        const {wappRef, ...rest} = props;
+        return <WithWapp {...rest} ref={wappRef} forwardedRef={ref} />;
+    });
 }

@@ -36,12 +36,14 @@ class Wapplr extends React.Component {
         const Component = (this.state.Component) ? withWapp(this.state.Component) : null;
         if (Component) {
             const setRef = this.setRef;
-            return <Component ref={setRef}/>
+            return <Component wappRef={setRef}/>
         }
         return null;
     }
 }
 Wapplr.contextType = WappContext;
+
+let renderedRef = null;
 
 export default function reactRender(p = {}) {
 
@@ -87,8 +89,6 @@ export default function reactRender(p = {}) {
                 return wapp.styles.add(styles)
             }
         }
-
-        let renderedRef = null;
 
         middleware.addHandle({
             react: function(req, res, next) {
