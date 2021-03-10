@@ -65,7 +65,7 @@ export default function reactRender(p = {}) {
                 render: Log,
                 renderType: "react"
             }
-        })
+        });
 
         let lastRenderType = null;
         let mutableContext = {
@@ -82,13 +82,13 @@ export default function reactRender(p = {}) {
                 // eslint-disable-next-line react-hooks/rules-of-hooks
                 useEffect(function () {
                     return wapp.styles.add(styles)
-                })
+                });
                 lastRenderType = "react"
             } else {
                 lastRenderType = null;
                 return wapp.styles.add(styles)
             }
-        }
+        };
 
         middleware.addHandle({
             react: function(req, res, next) {
@@ -111,7 +111,7 @@ export default function reactRender(p = {}) {
 
                     res.end = function (Component) {
                         if (!res.wappResponse.sended) {
-                            Object.defineProperty(res, "headersSent", {...defaultDescriptor, enumerable: false, writable: false, value: true})
+                            Object.defineProperty(res, "headersSent", {...defaultDescriptor, enumerable: false, writable: false, value: true});
 
                             const container = res.wappResponse.container;
 
@@ -128,7 +128,7 @@ export default function reactRender(p = {}) {
                             }
 
                         }
-                    }
+                    };
 
                     res.wappResponse.status(res.wappResponse.statusCode || 200);
                     res.wappResponse.send(res.wappResponse.content.render);
@@ -141,7 +141,7 @@ export default function reactRender(p = {}) {
                     next();
                 }
             }
-        })
+        });
 
         Object.defineProperty(middleware, "_initializedWapplrReact", {
             ...defaultDescriptor,

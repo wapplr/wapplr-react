@@ -14,14 +14,14 @@ export default function reactRender(p = {}) {
 
         wapp.contents.addComponent({
             html: Html
-        })
+        });
 
         wapp.contents.add({
             log: {
                 render: Log,
                 renderType: "react"
             },
-        })
+        });
 
         middleware.addHandle({
             react: function(req, res, next) {
@@ -36,7 +36,7 @@ export default function reactRender(p = {}) {
                         <WappContext.Provider value={{ wapp, req, res }}>
                             <Render />
                         </WappContext.Provider>
-                    )
+                    );
 
                     const RenderHtml = wapp.contents.getComponent("html") || Html;
 
@@ -54,7 +54,7 @@ export default function reactRender(p = {}) {
                     next();
                 }
             },
-        })
+        });
 
         Object.defineProperty(middleware, "_initializedWapplrReact", {
             ...defaultDescriptor,

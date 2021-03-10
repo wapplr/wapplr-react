@@ -32,20 +32,20 @@ export default function Log (props) {
     }
 
     useEffect(function didMount(){
-        const unsub = (subscribe) ? subscribe.locationChange(onLocationChange) : null
+        const unsub = (subscribe) ? subscribe.locationChange(onLocationChange) : null;
         return function willUnmount() {
             if (unsub) {
                 unsub();
             }
         }
-    }, [stateUrl])
+    }, [stateUrl]);
 
 
     const {styles} = wapp;
     const {remoteAddress, httpVersion, method, url, timestamp} = req.wappRequest;
     const {statusCode = 200, statusMessage = "", errorMessage = ""} = res.wappResponse;
 
-    const text = `[LOG] [${timestamp} - ${remoteAddress}] HTTP:${httpVersion} ${method} ${url || "/"} -> [${statusCode}] ${errorMessage || statusMessage}`
+    const text = `[LOG] [${timestamp} - ${remoteAddress}] HTTP:${httpVersion} ${method} ${url || "/"} -> [${statusCode}] ${errorMessage || statusMessage}`;
 
     styles.use(style);
 

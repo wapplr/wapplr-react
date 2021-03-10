@@ -57,7 +57,7 @@ export default function Template(props) {
                 unsub();
             }
         }
-    }, [url])
+    }, [url]);
 
     return (
         <div className={style.page}>

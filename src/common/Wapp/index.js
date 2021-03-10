@@ -61,24 +61,24 @@ export function withWapp(ComposedComponent) {
 
             props.subscribe = {
                 locationChange: function (fn) {
-                    setHandler("locationChange", fn)
+                    setHandler("locationChange", fn);
                     return function () {
                         setHandler("locationChange", null)
                     }
                 },
                 requestResolved: function (fn) {
-                    setHandler("requestResolved", fn)
+                    setHandler("requestResolved", fn);
                     return function () {
                         setHandler("requestResolved", null)
                     }
                 },
                 userChange: function (fn) {
-                    setHandler("userChange", fn)
+                    setHandler("userChange", fn);
                     return function () {
                         setHandler("userChange", null)
                     }
                 }
-            }
+            };
 
             return (
                 <ComposedComponent {...props} ref={forwardedRef} />
@@ -86,7 +86,7 @@ export function withWapp(ComposedComponent) {
         }
     }
 
-    const displayName = ComposedComponent.displayName || ComposedComponent.name || "Component"
+    const displayName = ComposedComponent.displayName || ComposedComponent.name || "Component";
 
     WithWapp.displayName = `WithWapp(${displayName})`;
     WithWapp.contextType = WappContext;

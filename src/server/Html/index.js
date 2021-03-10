@@ -33,7 +33,7 @@ export default function Html(props) {
     description = (description) ? description : (title && title.split) ? title.split(" | ")[0] : title;
 
     if (typeof author === "function") {author = author({wapp, req, res})}
-    author = (author || siteName)
+    author = (author || siteName);
 
     const scripts = assets.getScripts();
 
