@@ -43,8 +43,6 @@ class Wapplr extends React.Component {
 }
 Wapplr.contextType = WappContext;
 
-let renderedRef = null;
-
 export default function reactRender(p = {}) {
 
     const {wapp} = p;
@@ -115,16 +113,45 @@ export default function reactRender(p = {}) {
 
                             const container = res.wappResponse.container;
 
-                            if (!renderedRef){
+                            if (!middleware.renderedRef){
+
+                                if (res.wapplrReactEndType === "component"){
+
+                                    function Render() {
+                                        return (
+                                            <WappContext.Provider value={mutableContext}>
+                                                <Wapplr ref={function (e){middleware.renderedRef = e;}} Component={Component}/>
+                                            </WappContext.Provider>
+                                        )
+                                    }
+
+                                    if (res._originalEndFunction){
+                                        res._originalEndFunction({Render, wapp, req, res})
+                                    }
+
+                                    return;
+                                }
+
                                 ReactDOM.hydrate(
                                     <WappContext.Provider value={mutableContext}>
-                                        <Wapplr ref={function (e){renderedRef = e;}} Component={Component}/>
+                                        <Wapplr ref={function (e){middleware.renderedRef = e;}} Component={Component}/>
                                     </WappContext.Provider>,
                                     container
                                 )
 
                             } else {
-                                renderedRef.renderAgain(Component);
+
+                                if (res.wapplrReactEndType === "component"){
+
+                                    if (res._originalEndFunction){
+                                        res._originalEndFunction({update: () => middleware.renderedRef.renderAgain(Component), wapp, req, res})
+                                    }
+
+                                    return;
+                                }
+
+                                middleware.renderedRef.renderAgain(Component);
+
                             }
 
                         }
@@ -136,7 +163,7 @@ export default function reactRender(p = {}) {
                     next();
 
                 } else {
-                    renderedRef = null;
+                    middleware.renderedRef = null;
                     res.end = (res._originalEndFunction) ? res._originalEndFunction : res.end;
                     next();
                 }

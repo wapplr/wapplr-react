@@ -30,11 +30,26 @@ export default function reactRender(p = {}) {
                     res.wappResponse.status(res.wappResponse.statusCode || 200);
 
                     const Content = res.wappResponse.content.render;
-                    const Render = withWapp(Content);
+                    const RenderContent = withWapp(Content);
+
+                    if (res.wapplrReactEndType === "component"){
+
+                        function Render() {
+                            return (
+                                <WappContext.Provider value={{ wapp, req, res }}>
+                                    <RenderContent />
+                                </WappContext.Provider>
+                            )
+                        }
+
+                        res.wappResponse.send({Render, wapp, req, res});
+
+                        return;
+                    }
 
                     const contentText = ReactDOMServer.renderToStaticMarkup(
                         <WappContext.Provider value={{ wapp, req, res }}>
-                            <Render />
+                            <RenderContent />
                         </WappContext.Provider>
                     );
 
