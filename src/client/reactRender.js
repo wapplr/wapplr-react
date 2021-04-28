@@ -134,7 +134,7 @@ export default function reactRender(p = {}) {
 
                                 ReactDOM.hydrate(
                                     <WappContext.Provider value={mutableContext}>
-                                        <Wapplr ref={function (e){middleware.renderedRef = e;}} Component={Component}/>
+                                        <Wapplr key={Date.now()} ref={function (e){middleware.renderedRef = e;}} Component={Component}/>
                                     </WappContext.Provider>,
                                     container
                                 )
