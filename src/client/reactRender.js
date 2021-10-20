@@ -25,7 +25,7 @@ class Wapplr extends React.Component {
             })
         } else {
             if (this.refElement && this.refElement.onLocationChange){
-                this.refElement.onLocationChange(res.wappResponse.store.getState().req.url)
+                this.refElement.onLocationChange(res.wappResponse.store.getState("req.url"))
             }
         }
     }

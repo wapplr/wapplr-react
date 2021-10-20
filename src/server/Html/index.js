@@ -22,7 +22,8 @@ export default function Html(props) {
         appleTouchIcon,
     } = config;
 
-    const {state, content = {}, statusCode = 200, containerElementId = "app", appStateName = "APP_STATE"} = res.wappResponse;
+    const {store, content = {}, statusCode = 200, containerElementId = "app", appStateName = "APP_STATE"} = res.wappResponse;
+    const state = (store) ? store.getState() : {};
 
     let {title = "", description = "", author = "Wapplr"} = content;
 

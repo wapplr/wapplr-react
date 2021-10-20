@@ -24,16 +24,15 @@ export default function getUtils(context) {
     }
 
     return {
-        getGlobalState: function () {
-            return res.wappResponse.store.getState();
+        getGlobalState: function (p) {
+            return res.wappResponse.store.getState(p);
         },
         getRequestUrl: function () {
-            const globalState = this.getGlobalState();
-            return globalState.req.url;
+            return this.getGlobalState("req.url");
         },
         getRequestUser: function () {
-            const globalState = this.getGlobalState();
-            return (globalState.req.user?._id) ? globalState.req.user : null;
+            const user = this.getGlobalState("req.user");
+            return (user?._id) ? user : null;
         },
         logout: async function (p = {}) {
             const {requestName = "userLogout", redirect = "/", timeOut} = p;

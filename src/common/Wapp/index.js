@@ -16,7 +16,7 @@ export function withWapp(ComposedComponent) {
             this.onLocationChange = this.onLocationChange.bind(this);
 
             this.state = {
-                url: res.wappResponse.store.getState().req.url
+                url: res.wappResponse.store.getState("req.url")
             }
 
         }
@@ -26,7 +26,7 @@ export function withWapp(ComposedComponent) {
         componentDidMount() {
             const {res} = this.context;
             const getHandlers = this.getHandlers;
-            this.unsubscribe = res.wappResponse.store.subscribe(function (state, {type, payload}) {
+            this.unsubscribe = res.wappResponse.store.subscribe(function ({type, payload}) {
                 const handlers = getHandlers();
                 if (type === "INS_RES" && payload.name === "responses"){
                     if (handlers["requestResolved"]) {
