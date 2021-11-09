@@ -3,7 +3,7 @@ export default function getUtils(context) {
     const {wapp, req, res} = context;
 
     function historyPush({redirect, response, requestName, timeOut}) {
-        if (!response[requestName]?.error && typeof response[requestName]?.record !== "undefined" && redirect){
+        if (response && !response[requestName]?.error && typeof response[requestName]?.record !== "undefined" && redirect){
             const parsedUrl = {
                 ...(typeof redirect == "object") ? redirect : {},
                 pathname: (typeof redirect == "string") ? redirect : redirect.pathname,
@@ -53,10 +53,10 @@ export default function getUtils(context) {
             return response[requestName] || response;
         },
         sendRequest: async function (p = {}) {
-            const {requestName = "userForgotPassword", args, redirect, timeOut} = p;
-            const response = await wapp.requests.send({requestName, args, req, res});
+            const {requestName = "userForgotPassword", redirect, timeOut, ...rest} = p;
+            const response = await wapp.requests.send({requestName, req, res, ...rest});
             historyPush({redirect, response, requestName, timeOut});
-            return response[requestName] || response;
+            return (response && response[requestName]) || response;
         },
     }
 }
