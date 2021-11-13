@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, {useLayoutEffect} from "react";
 import ReactDOM from "react-dom";
 
 import Log from "../common/Log";
@@ -78,9 +78,9 @@ export default function reactRender(p = {}) {
                 (!mutableContext.res.wappResponse.content && lastRenderType === "react")
             ) {
                 // eslint-disable-next-line react-hooks/rules-of-hooks
-                useEffect(function () {
+                useLayoutEffect(function () {
                     return wapp.styles.add(styles)
-                });
+                }, [styles]);
                 lastRenderType = "react"
             } else {
                 lastRenderType = null;
