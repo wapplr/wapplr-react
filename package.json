@@ -24,7 +24,7 @@
         "wapplr-react build": "wapplr-cli build",
         "wapplr-react clean": "wapplr-cli clean"
     },
-    "version": "1.0.33",
+    "version": "1.0.34",
     "files": [
         "dist/*"
     ],
