@@ -3,11 +3,15 @@
     "description": "React integration extension for Wapplr",
     "license": "MIT",
     "dependencies": {
-        "wapplr": "^1.0.0",
-        "react": "^17.0.1",
-        "react-dom": "^17.0.1"
+        "wapplr": "^1.0.0"
+    },
+    "peerDependencies": {
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0"
     },
     "devDependencies": {
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
         "wapplr-cli": "^1.0.0"
     },
     "engines": {
@@ -24,7 +28,7 @@
         "wapplr-react build": "wapplr-cli build",
         "wapplr-react clean": "wapplr-cli clean"
     },
-    "version": "1.0.38",
+    "version": "1.0.43",
     "files": [
         "dist/*"
     ],

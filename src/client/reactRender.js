@@ -1,5 +1,5 @@
 import React, {useLayoutEffect} from "react";
-import ReactDOM from "react-dom";
+import ReactDOM from "react-dom/client";
 
 import Log from "../common/Log";
 import {defaultDescriptor} from "../common/utils";
@@ -132,11 +132,11 @@ export default function reactRender(p = {}) {
                                     return;
                                 }
 
-                                ReactDOM.hydrate(
+                                ReactDOM.hydrateRoot(
+                                    container,
                                     <WappContext.Provider value={mutableContext}>
                                         <Wapplr key={Date.now()} ref={function (e){middleware.renderedRef = e;}} Component={Component}/>
                                     </WappContext.Provider>,
-                                    container
                                 )
 
                             } else {
