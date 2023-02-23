@@ -132,12 +132,20 @@ export default function reactRender(p = {}) {
                                     return;
                                 }
 
-                                ReactDOM.hydrateRoot(
-                                    container,
-                                    <WappContext.Provider value={mutableContext}>
-                                        <Wapplr key={Date.now()} ref={function (e){middleware.renderedRef = e;}} Component={Component}/>
-                                    </WappContext.Provider>,
-                                )
+                                if (container._reactRoot) {
+                                    container._reactRoot.render(
+                                        <WappContext.Provider value={mutableContext}>
+                                            <Wapplr key={Date.now()} ref={function (e){middleware.renderedRef = e;}} Component={Component}/>
+                                        </WappContext.Provider>
+                                    );
+                                } else {
+                                    container._reactRoot = ReactDOM.hydrateRoot(
+                                        container,
+                                        <WappContext.Provider value={mutableContext}>
+                                            <Wapplr key={Date.now()} ref={function (e){middleware.renderedRef = e;}} Component={Component}/>
+                                        </WappContext.Provider>,
+                                    );
+                                }
 
                             } else {
 
