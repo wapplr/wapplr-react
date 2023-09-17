@@ -35,7 +35,7 @@ class Wapplr extends React.Component {
             }
         } else {
             if (this.refElement && this.refElement.onLocationChange){
-                const onLocationChange = this.refElement.onLocationChange
+                const onLocationChange = this.refElement.onLocationChange;
                 if (callback) {
                     async function asyncFunction() {
                         await onLocationChange(res.wappResponse.store.getState("req.url"));
@@ -46,6 +46,11 @@ class Wapplr extends React.Component {
                     onLocationChange(res.wappResponse.store.getState("req.url"))
                 }
             }
+        }
+    }
+    componentDidMount() {
+        if (this.props.effect) {
+            this.props.effect()
         }
     }
     componentWillUnmount() {
@@ -161,14 +166,32 @@ export default function reactRender(p = {}) {
                                 if (container._reactRoot) {
                                     container._reactRoot.render(
                                         <WappContext.Provider value={mutableContext}>
-                                            <Wapplr key={Date.now()} ref={function (e){middleware.renderedRef = e;}} Component={Component}/>
+                                            <Wapplr
+                                                key={Date.now()}
+                                                ref={function (e){middleware.renderedRef = e;}}
+                                                Component={Component}
+                                                effect={()=>{
+                                                    if (callback) {
+                                                        callback()
+                                                    }
+                                                }}
+                                            />
                                         </WappContext.Provider>
                                     );
                                 } else {
                                     container._reactRoot = ReactDOM.hydrateRoot(
                                         container,
                                         <WappContext.Provider value={mutableContext}>
-                                            <Wapplr key={Date.now()} ref={function (e){middleware.renderedRef = e;}} Component={Component}/>
+                                            <Wapplr
+                                                key={Date.now()}
+                                                ref={function (e){middleware.renderedRef = e;}}
+                                                Component={Component}
+                                                effect={()=>{
+                                                    if (callback) {
+                                                        callback()
+                                                    }
+                                                }}
+                                            />
                                         </WappContext.Provider>,
                                     );
                                 }
