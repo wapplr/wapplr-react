@@ -1,4 +1,4 @@
-import React, {useLayoutEffect} from "react";
+import React, {useEffect, useLayoutEffect} from "react";
 import ReactDOM from "react-dom/client";
 
 import Log from "../common/Log";
@@ -17,15 +17,34 @@ class Wapplr extends React.Component {
     setRef(e) {
         this.refElement = e;
     }
-    renderAgain(Component) {
+    renderAgain(Component, callback) {
         const {res} = this.context;
         if (Component !== this.state.Component) {
-            this.setState({
-                Component
-            })
+            if (callback) {
+                async function asyncFunction() {
+                    await this.setState({
+                        Component
+                    });
+                    callback()
+                }
+                asyncFunction()
+            } else {
+                this.setState({
+                    Component
+                })
+            }
         } else {
             if (this.refElement && this.refElement.onLocationChange){
-                this.refElement.onLocationChange(res.wappResponse.store.getState("req.url"))
+                const onLocationChange = this.refElement.onLocationChange
+                if (callback) {
+                    async function asyncFunction() {
+                        await onLocationChange(res.wappResponse.store.getState("req.url"));
+                        callback()
+                    }
+                    asyncFunction()
+                } else {
+                    onLocationChange(res.wappResponse.store.getState("req.url"))
+                }
             }
         }
     }
@@ -89,7 +108,7 @@ export default function reactRender(p = {}) {
         };
 
         middleware.addHandle({
-            react: function(req, res, next) {
+            react: async function(req, res, next) {
 
                 mutableContext.req = req;
                 mutableContext.res = res;
@@ -107,7 +126,7 @@ export default function reactRender(p = {}) {
 
                     }
 
-                    res.end = function (Component) {
+                    res.end = function (Component, callback) {
                         if (!res.wappResponse.sended) {
                             Object.defineProperty(res, "headersSent", {...defaultDescriptor, enumerable: false, writable: false, value: true});
 
@@ -118,6 +137,13 @@ export default function reactRender(p = {}) {
                                 if (res.wapplrReactEndType === "component"){
 
                                     function Render() {
+
+                                        useEffect(()=>{
+                                            if (callback) {
+                                                callback();
+                                            }
+                                        }, []);
+
                                         return (
                                             <WappContext.Provider value={mutableContext}>
                                                 <Wapplr ref={function (e){middleware.renderedRef = e;}} Component={Component}/>
@@ -152,13 +178,13 @@ export default function reactRender(p = {}) {
                                 if (res.wapplrReactEndType === "component"){
 
                                     if (res._originalEndFunction){
-                                        res._originalEndFunction({update: () => middleware.renderedRef.renderAgain(Component), wapp, req, res})
+                                        res._originalEndFunction({update: () => middleware.renderedRef.renderAgain(Component, callback), wapp, req, res})
                                     }
 
                                     return;
                                 }
 
-                                middleware.renderedRef.renderAgain(Component);
+                                middleware.renderedRef.renderAgain(Component, callback);
 
                             }
 
@@ -166,7 +192,10 @@ export default function reactRender(p = {}) {
                     };
 
                     res.wappResponse.status(res.wappResponse.statusCode || 200);
-                    res.wappResponse.send(res.wappResponse.content.render);
+
+                    await new Promise((resolve)=>{
+                        res.wappResponse.send(res.wappResponse.content.render, resolve);
+                    });
 
                     next();
 

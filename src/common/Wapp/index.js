@@ -45,9 +45,9 @@ export function withWapp(ComposedComponent) {
                 this.unsubscribe();
             }
         }
-        onLocationChange(url) {
+        async onLocationChange(url) {
             if (this.handlers["locationChange"]){
-                this.handlers["locationChange"](url)
+                await this.handlers["locationChange"](url)
             }
         }
         setHandler(type, handler) {
