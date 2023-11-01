@@ -21,8 +21,9 @@ class Wapplr extends React.Component {
         const {res} = this.context;
         if (Component !== this.state.Component) {
             if (callback) {
+                const t = this;
                 async function asyncFunction() {
-                    await this.setState({
+                    await t.setState({
                         Component
                     });
                     callback()
