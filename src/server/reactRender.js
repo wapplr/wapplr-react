@@ -47,13 +47,89 @@ export default function reactRender(p = {}) {
                         return;
                     }
 
+                    const RenderHtml = wapp.contents.getComponent("html") || Html;
+
+                    if (ReactDOMServer.renderToPipeableStream && (res.wapplrReactEndType === 'pipe' || res.wapplrReactEndType === 'pipeWaitForAll')) {
+
+                        function Pipe() {
+
+                            function Children() {
+                                return (
+                                    <WappContext.Provider value={{wapp, req, res}}>
+                                        <RenderContent/>
+                                    </WappContext.Provider>
+                                )
+                            }
+
+                            const children = <Children/>;
+
+                            return (
+                                <WappContext.Provider value={{wapp, req, res}}>
+                                    <RenderHtml>
+                                        {children}
+                                    </RenderHtml>
+                                </WappContext.Provider>
+                            )
+
+                        }
+
+                        let didError = false;
+
+                        const {pipe} = ReactDOMServer.renderToPipeableStream(<Pipe/>, {
+                            onShellReady() {
+                                if (res.wapplrReactEndType === 'pipe') {
+                                    if (!res.headersSent) {
+                                        res.wappResponse.sendData = {
+                                            dontSetContentLength: true
+                                        };
+
+                                        if (didError) {
+                                            res.wappResponse.status(didError.statusCode || 500, didError);
+                                        }
+
+                                        res.wapp.middleware.runSendMiddlewares(req, res, function next() {
+                                            res.wapp.log(req, res);
+                                            pipe(res)
+                                        });
+                                    }
+                                }
+                            },
+                            onShellError(err) {
+                                res.wappResponse.status(err.statusCode || 500, err);
+                                res.wapp.log(err, req, res);
+                                next(err)
+                            },
+                            onAllReady: ()=>{
+                                if (res.wapplrReactEndType === 'pipeWaitForAll') {
+                                    if (!res.headersSent) {
+                                        res.wappResponse.sendData = {
+                                            dontSetContentLength: true
+                                        };
+                                        if (didError) {
+                                            res.wappResponse.status(didError.statusCode || 500, didError);
+                                        }
+                                        res.wapp.middleware.runSendMiddlewares(req, res, function next() {
+                                            res.wapp.log(req, res);
+                                            pipe(res)
+                                        });
+                                    }
+                                }
+                                res.end()
+                            },
+                            onError: (err)=>{
+                                didError = err;
+                            }
+                        });
+
+                        return;
+
+                    }
+
                     const contentText = ReactDOMServer.renderToStaticMarkup(
                         <WappContext.Provider value={{ wapp, req, res }}>
                             <RenderContent />
                         </WappContext.Provider>
                     );
-
-                    const RenderHtml = wapp.contents.getComponent("html") || Html;
 
                     res.wappResponse.send("<!DOCTYPE html>" +
                         ReactDOMServer.renderToStaticMarkup(
