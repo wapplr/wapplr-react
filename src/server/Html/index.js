@@ -79,7 +79,6 @@ export default function Html(props) {
                     return <link
                         key={"css-"+i}
                         rel={"stylesheet"}
-                        as={"style"}
                         type={"text/css"}
                         href={css}
                     />
