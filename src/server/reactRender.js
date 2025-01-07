@@ -75,6 +75,8 @@ export default function reactRender(p = {}) {
 
                         let didError = false;
 
+                        const wapplrReactPipeStream = res.wapplrReactPipeStream || res;
+
                         const {pipe} = ReactDOMServer.renderToPipeableStream(<Pipe/>, {
                             onShellReady() {
                                 if (res.wapplrReactEndType === 'pipe') {
@@ -89,7 +91,7 @@ export default function reactRender(p = {}) {
 
                                         res.wapp.middleware.runSendMiddlewares(req, res, function next() {
                                             res.wapp.log(req, res);
-                                            pipe(res)
+                                            pipe(wapplrReactPipeStream)
                                         });
                                     }
                                 }
@@ -110,7 +112,7 @@ export default function reactRender(p = {}) {
                                         }
                                         res.wapp.middleware.runSendMiddlewares(req, res, function next() {
                                             res.wapp.log(req, res);
-                                            pipe(res)
+                                            pipe(wapplrReactPipeStream)
                                         });
                                     }
                                 }
